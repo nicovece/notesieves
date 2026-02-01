@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
 from .chunker import MarkdownChunker
 from .config import Config
@@ -31,9 +32,18 @@ def run_ingest(config: Config, notes_path: Path, clear: bool = False):
     console.print(f"Found [green]{len(md_files)}[/green] markdown files")
 
     all_chunks = []
-    for file_path in md_files:
-        chunks = chunker.chunk_file(file_path)
-        all_chunks.extend(chunks)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Processing files...", total=len(md_files))
+        for file_path in md_files:
+            chunks = chunker.chunk_file(file_path)
+            all_chunks.extend(chunks)
+            progress.advance(task)
 
     console.print(f"Created [green]{len(all_chunks)}[/green] chunks")
 
