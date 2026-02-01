@@ -5,6 +5,7 @@ from rich.console import Console
 
 from .config import load_config
 from .ingest import run_ingest
+from .query import run_query
 
 app = typer.Typer(
     name="notesieves",
@@ -29,7 +30,8 @@ def ask(
     question: str = typer.Argument(..., help="Your question about the notes"),
 ):
     """Ask a question about your indexed notes."""
-    console.print(f"[dim]Would ask:[/dim] {question}")
+    config = load_config()
+    run_query(config, question)
 
 
 @app.command()
