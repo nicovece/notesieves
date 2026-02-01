@@ -1,0 +1,15 @@
+paths:
+  notes_directory: ~/Documents/Zettelkasten/CF
+  database_directory: ./data/chroma
+
+chunking:
+  max_chunk_tokens: 500
+  overlap_tokens: 50
+  split_on_headings: true
+
+retrieval:
+  top_k: 5
+
+llm:
+  model: claude-sonnet-4-20250514
+  max_tokens: 1024

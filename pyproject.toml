@@ -1,0 +1,25 @@
+[project]
+name = "notesieves"
+version = "0.1.0"
+description = "Query your markdown notes with AI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.9.0",
+    "chromadb>=0.4.0",
+    "sentence-transformers>=2.2.0",
+    "torch<2.3",
+    "anthropic>=0.18.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+notesieves = "notesieves.cli:app"
+nsie = "notesieves.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
