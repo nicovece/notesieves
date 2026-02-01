@@ -1,5 +1,10 @@
+from pathlib import Path
+
 import typer
 from rich.console import Console
+
+from .config import load_config
+from .ingest import run_ingest
 
 app = typer.Typer(
     name="notesieves",
@@ -14,9 +19,9 @@ def ingest(
     clear: bool = typer.Option(False, "--clear", "-c", help="Clear existing index first"),
 ):
     """Index markdown files from a directory."""
-    console.print(f"[dim]Would ingest from:[/dim] {path}")
-    if clear:
-        console.print("[dim]Would clear existing index first[/dim]")
+    config = load_config()
+    notes_path = Path(path).expanduser().resolve()
+    run_ingest(config, notes_path, clear=clear)
 
 
 @app.command()

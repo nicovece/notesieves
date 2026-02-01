@@ -74,7 +74,7 @@ class MarkdownChunker:
                 metadata={
                     "file_path": str(file_path),
                     "file_name": file_name,
-                    "heading_hierarchy": hierarchy,
+                    "heading_hierarchy": " > ".join(hierarchy),
                 },
             )]
 
@@ -92,7 +92,7 @@ class MarkdownChunker:
                     metadata={
                         "file_path": str(file_path),
                         "file_name": file_name,
-                        "heading_hierarchy": hierarchy,
+                        "heading_hierarchy": " > ".join(hierarchy),
                     },
                 ))
                 current_parts = []
@@ -107,7 +107,7 @@ class MarkdownChunker:
                 metadata={
                     "file_path": str(file_path),
                     "file_name": file_name,
-                    "heading_hierarchy": hierarchy,
+                    "heading_hierarchy": " > ".join(hierarchy),
                 },
             ))
 

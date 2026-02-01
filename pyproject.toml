@@ -9,6 +9,7 @@ dependencies = [
     "chromadb>=0.4.0",
     "sentence-transformers>=2.2.0",
     "torch<2.3",
+    "numpy<2",
     "anthropic>=0.18.0",
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0",
