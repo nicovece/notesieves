@@ -21,6 +21,23 @@ class VectorStore:
             metadatas=[c.metadata for c in chunks],
         )
 
+    def search(self, query_embedding: list[float], top_k: int = 5) -> list[dict]:
+        """Search for similar chunks."""
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+
+        chunks = []
+        for i in range(len(results["ids"][0])):
+            chunks.append({
+                "text": results["documents"][0][i],
+                "metadata": results["metadatas"][0][i],
+                "distance": results["distances"][0][i],
+            })
+        return chunks
+
     def clear(self):
         """Delete all documents in the collection."""
         self.client.delete_collection(self.collection_name)
