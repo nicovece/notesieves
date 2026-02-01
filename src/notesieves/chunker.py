@@ -95,8 +95,9 @@ class MarkdownChunker:
                         "heading_hierarchy": " > ".join(hierarchy),
                     },
                 ))
-                current_parts = []
-                current_tokens = 0
+                overlap_parts = self._get_overlap_parts(current_parts)
+                current_parts = overlap_parts
+                current_tokens = self._estimate_tokens("\n\n".join(overlap_parts))
 
             current_parts.append(paragraph)
             current_tokens += para_tokens
@@ -112,6 +113,18 @@ class MarkdownChunker:
             ))
 
         return chunks
+
+    def _get_overlap_parts(self, parts: list[str]) -> list[str]:
+        """Get trailing paragraphs that fit within overlap_tokens."""
+        overlap = []
+        tokens = 0
+        for part in reversed(parts):
+            part_tokens = self._estimate_tokens(part)
+            if tokens + part_tokens > self.overlap_tokens and overlap:
+                break
+            overlap.insert(0, part)
+            tokens += part_tokens
+        return overlap
 
     def _estimate_tokens(self, text: str) -> int:
         """Rough token estimate: ~4 chars per token for English."""
