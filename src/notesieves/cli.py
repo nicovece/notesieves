@@ -47,12 +47,13 @@ def ingest(
 @app.command()
 def ask(
     question: str = typer.Argument(..., help="Your question about the notes"),
+    broad: bool = typer.Option(False, "--broad", "-b", help="Broad mode: find relevant notes instead of detailed answers"),
 ):
     """Ask a question about your indexed notes."""
     config = _load_config_or_exit()
 
     try:
-        run_query(config, question)
+        run_query(config, question, broad=broad)
     except anthropic.AuthenticationError:
         console.print("[red]Invalid API key.[/red] Check ANTHROPIC_API_KEY in your .env file.")
         raise typer.Exit(1)

@@ -17,6 +17,38 @@ Sources:
 """
 
 
+BROAD_SYSTEM_PROMPT = """You are a helpful assistant that helps the user navigate their personal notes collection.
+
+You will be given a map of note files and their section headings that are relevant to the user's question.
+
+Guidelines:
+- Recommend which notes the user should read, based on the file names and headings
+- Explain briefly why each note is relevant
+- Group or order your recommendations by relevance (most relevant first)
+- If headings suggest a reading order or progression, mention it
+- You do NOT have the full note content — only file names and section headings
+- Be honest about what you can and cannot infer from headings alone
+"""
+
+
+def build_broad_user_prompt(question: str, file_map: dict[str, list[str]]) -> str:
+    """Build a prompt from the file→headings map for broad retrieval."""
+    parts = []
+    for file_name, headings in file_map.items():
+        heading_list = "\n".join(f"    - {h}" for h in headings) if headings else "    (no headings)"
+        parts.append(f"  {file_name}\n{heading_list}")
+
+    map_str = "\n\n".join(parts)
+
+    return (
+        f"Here is a map of my notes that may be relevant:\n\n"
+        f"{map_str}\n\n"
+        f"---\n\n"
+        f"My question: {question}\n\n"
+        f"Based on the file names and section headings above, recommend which notes I should read and why."
+    )
+
+
 def build_user_prompt(question: str, context_chunks: list[dict]) -> str:
     """Build the user prompt with retrieved context."""
     context_parts = []

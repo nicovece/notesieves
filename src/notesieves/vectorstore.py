@@ -46,6 +46,25 @@ class VectorStore:
             metadata={"hnsw:space": "cosine"},
         )
 
+    def search_broad(self, query_embedding: list[float], top_k: int = 30) -> dict[str, list[str]]:
+        """Search and return unique file→headings map (no document text)."""
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=min(top_k, self.collection.count()),
+            include=["metadatas"],
+        )
+
+        file_map: dict[str, set[str]] = {}
+        for meta in results["metadatas"][0]:
+            name = meta.get("file_name", "Unknown")
+            heading = meta.get("heading_hierarchy", "")
+            if name not in file_map:
+                file_map[name] = set()
+            if heading:
+                file_map[name].add(heading)
+
+        return {name: sorted(headings) for name, headings in sorted(file_map.items())}
+
     def list_sources(self) -> list[str]:
         """Return sorted unique file names from all indexed chunks."""
         results = self.collection.get(include=["metadatas"])
