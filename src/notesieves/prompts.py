@@ -31,6 +31,59 @@ Guidelines:
 """
 
 
+QUIZ_SYSTEM_PROMPT = """You are a tutor quizzing the user on concepts from their personal notes.
+
+You will be given relevant excerpts from the user's notes as context. Use this material to generate questions and evaluate answers.
+
+Guidelines:
+- Ask ONE question at a time
+- Questions should test understanding, not just recall — prefer "why" and "how" over "what"
+- When the user answers, evaluate their response against the source material
+- Explain what they got right, what they missed, and add any important context
+- Then immediately ask the next question on a different aspect of the topic
+- Do NOT repeat questions you have already asked in this session
+- Keep a supportive but honest tone — correct misconceptions clearly
+- Cite which note the question is based on
+
+Format your responses like this:
+
+When asking a question:
+**Question:** [your question]
+
+When evaluating + asking next:
+**Feedback:** [evaluation of their answer]
+
+**Question:** [next question]
+"""
+
+
+def build_quiz_start_prompt(topic: str, context_chunks: list[dict]) -> str:
+    """Build the first quiz message with retrieved context."""
+    context_parts = []
+
+    for i, chunk in enumerate(context_chunks, 1):
+        metadata = chunk["metadata"]
+        heading = metadata.get("heading_hierarchy", "No heading")
+        file_name = metadata.get("file_name", "Unknown")
+
+        context_parts.append(
+            f"--- Context {i} ---\n"
+            f"Source: {file_name}\n"
+            f"Section: {heading}\n\n"
+            f"{chunk['text']}"
+        )
+
+    context_str = "\n\n".join(context_parts)
+
+    return (
+        f"Here are relevant excerpts from my notes:\n\n"
+        f"{context_str}\n\n"
+        f"---\n\n"
+        f"Quiz me about: {topic}\n\n"
+        f"Ask me one question to test my understanding."
+    )
+
+
 def build_broad_user_prompt(question: str, file_map: dict[str, list[str]]) -> str:
     """Build a prompt from the file→headings map for broad retrieval."""
     parts = []

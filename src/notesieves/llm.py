@@ -21,3 +21,13 @@ class LLMService:
             ],
         )
         return response.content[0].text
+
+    def generate_multiturn(self, system_prompt: str, messages: list[dict]) -> str:
+        """Generate a response from a multi-turn conversation."""
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=self.max_tokens,
+            system=system_prompt,
+            messages=messages,
+        )
+        return response.content[0].text

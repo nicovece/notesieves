@@ -6,7 +6,7 @@ from rich.console import Console
 
 from .config import load_config
 from .ingest import run_ingest
-from .query import run_query
+from .query import run_query, run_quiz
 
 app = typer.Typer(
     name="notesieves",
@@ -54,6 +54,23 @@ def ask(
 
     try:
         run_query(config, question, broad=broad)
+    except anthropic.AuthenticationError:
+        console.print("[red]Invalid API key.[/red] Check ANTHROPIC_API_KEY in your .env file.")
+        raise typer.Exit(1)
+    except anthropic.APIConnectionError:
+        console.print("[red]Could not connect to the Anthropic API.[/red] Check your internet connection.")
+        raise typer.Exit(1)
+
+
+@app.command()
+def quiz(
+    topic: str = typer.Argument(..., help="Topic to be quizzed on"),
+):
+    """Start an interactive quiz on a topic from your notes."""
+    config = _load_config_or_exit()
+
+    try:
+        run_quiz(config, topic)
     except anthropic.AuthenticationError:
         console.print("[red]Invalid API key.[/red] Check ANTHROPIC_API_KEY in your .env file.")
         raise typer.Exit(1)
