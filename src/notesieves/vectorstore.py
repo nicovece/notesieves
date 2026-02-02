@@ -46,6 +46,12 @@ class VectorStore:
             metadata={"hnsw:space": "cosine"},
         )
 
+    def list_sources(self) -> list[str]:
+        """Return sorted unique file names from all indexed chunks."""
+        results = self.collection.get(include=["metadatas"])
+        names = {m["file_name"] for m in results["metadatas"] if "file_name" in m}
+        return sorted(names)
+
     def count(self) -> int:
         """Return number of chunks in the store."""
         return self.collection.count()

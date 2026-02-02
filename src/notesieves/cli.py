@@ -61,6 +61,26 @@ def ask(
         raise typer.Exit(1)
 
 
+@app.command(name="list")
+def list_notes():
+    """List all indexed note titles."""
+    config = _load_config_or_exit()
+
+    from .vectorstore import VectorStore
+
+    store = VectorStore(config.paths.database_directory)
+    sources = store.list_sources()
+
+    if not sources:
+        console.print("[yellow]No notes indexed yet. Run 'nsie ingest <path>' first.[/yellow]")
+        raise typer.Exit(0)
+
+    console.print(f"\n[bold]Indexed Notes ({len(sources)})[/bold]\n")
+    for name in sources:
+        console.print(f"  {name}")
+    console.print()
+
+
 @app.command()
 def status():
     """Show index statistics."""
