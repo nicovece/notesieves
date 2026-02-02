@@ -1,4 +1,9 @@
+import logging
+
 from sentence_transformers import SentenceTransformer
+
+# Suppress the harmless "position_ids UNEXPECTED" warning from transformers
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 
 
 class EmbeddingService:

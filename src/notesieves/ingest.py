@@ -5,7 +5,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 
 from .chunker import MarkdownChunker
 from .config import Config
-from .embeddings import EmbeddingService
 from .vectorstore import VectorStore
 
 console = Console()
@@ -17,7 +16,11 @@ def run_ingest(config: Config, notes_path: Path, clear: bool = False):
         max_tokens=config.chunking.max_chunk_tokens,
         overlap_tokens=config.chunking.overlap_tokens,
     )
-    embedder = EmbeddingService()
+
+    with console.status("Loading embedding model..."):
+        from .embeddings import EmbeddingService
+        embedder = EmbeddingService()
+
     store = VectorStore(config.paths.database_directory)
 
     if clear:
@@ -39,7 +42,7 @@ def run_ingest(config: Config, notes_path: Path, clear: bool = False):
         TaskProgressColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("Processing files...", total=len(md_files))
+        task = progress.add_task("Chunking files...", total=len(md_files))
         for file_path in md_files:
             chunks = chunker.chunk_file(file_path)
             all_chunks.extend(chunks)
@@ -47,11 +50,20 @@ def run_ingest(config: Config, notes_path: Path, clear: bool = False):
 
     console.print(f"Created [green]{len(all_chunks)}[/green] chunks")
 
-    console.print("Generating embeddings...")
-    texts = [chunk.text for chunk in all_chunks]
-    embeddings = embedder.embed_batch(texts)
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Generating embeddings...", total=len(all_chunks))
+        texts = [chunk.text for chunk in all_chunks]
+        # embed_batch handles batching internally; we update progress after
+        embeddings = embedder.embed_batch(texts)
+        progress.update(task, completed=len(all_chunks))
 
-    console.print("Storing in vector database...")
-    store.add_chunks(all_chunks, embeddings)
+    with console.status("Storing in vector database..."):
+        store.add_chunks(all_chunks, embeddings)
 
     console.print(f"[green]Done.[/green] Indexed {len(md_files)} files ({len(all_chunks)} chunks)")

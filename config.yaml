@@ -1,5 +1,5 @@
 paths:
-  notes_directory: ~/Documents/Zettelkasten/CF
+  notes_directory: ~/Documents/Zetsync/CF
   database_directory: ./data/chroma
 
 chunking:
