@@ -14,8 +14,14 @@ class VectorStore:
 
     def add_chunks(self, chunks: list, embeddings: list[list[float]]):
         """Add chunks with their embeddings to the store."""
+        ids = []
+        for c in chunks:
+            file_hash = c.metadata.get("file_hash", "nohash")
+            chunk_index = c.metadata.get("chunk_index", 0)
+            ids.append(f"{file_hash}_{chunk_index}")
+
         self.collection.add(
-            ids=[f"chunk_{i}" for i in range(len(chunks))],
+            ids=ids,
             embeddings=embeddings,
             documents=[c.text for c in chunks],
             metadatas=[c.metadata for c in chunks],
@@ -37,6 +43,21 @@ class VectorStore:
                 "distance": results["distances"][0][i],
             })
         return chunks
+
+    def get_file_hashes(self) -> dict[str, str]:
+        """Return a mapping of file_path → file_hash for all indexed files."""
+        results = self.collection.get(include=["metadatas"])
+        file_hashes = {}
+        for meta in results["metadatas"]:
+            fp = meta.get("file_path", "")
+            fh = meta.get("file_hash", "")
+            if fp and fh:
+                file_hashes[fp] = fh
+        return file_hashes
+
+    def delete_by_file(self, file_path: str):
+        """Delete all chunks belonging to a specific file."""
+        self.collection.delete(where={"file_path": file_path})
 
     def clear(self):
         """Delete all documents in the collection."""

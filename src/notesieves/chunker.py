@@ -14,7 +14,7 @@ class MarkdownChunker:
         self.max_tokens = max_tokens
         self.overlap_tokens = overlap_tokens
 
-    def chunk_file(self, file_path: Path) -> list[Chunk]:
+    def chunk_file(self, file_path: Path, file_hash: str = "") -> list[Chunk]:
         """Main entry point: file → list of chunks."""
         content = file_path.read_text(encoding="utf-8")
         file_name = file_path.stem
@@ -29,6 +29,7 @@ class MarkdownChunker:
         for i, chunk in enumerate(chunks):
             chunk.metadata["chunk_index"] = i
             chunk.metadata["total_chunks_in_file"] = len(chunks)
+            chunk.metadata["file_hash"] = file_hash
 
         return chunks
 
